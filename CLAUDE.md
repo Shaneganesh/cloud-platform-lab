@@ -33,8 +33,8 @@ transaction/ledger rows to Postgres, containerized, on AKS, secrets in Key Vault
 load-tested for high-concurrency bursts, fronted by observability.
 
 ## Roadmap (Azure first)
-0. Local toolchain — az, terraform, kubectl, gh, helm, k6, docker   ← CURRENT
-1. Azure auth + subscription + provider registration
+0. Local toolchain — az, terraform, kubectl, gh, helm, k6, docker   ✅ DONE
+1. Azure auth + subscription + provider registration   ← CURRENT
 2. Bootstrap — resource group, Terraform remote state (storage account + container),
    GitHub→Azure OIDC federated identity
 3. GitHub repo scaffold + structure + branch protection
@@ -54,19 +54,34 @@ load-tested for high-concurrency bursts, fronted by observability.
   incident write-up per break/fix drill.
 
 ## Current status
-- Brand new project — nothing built yet.
-- Immediate next step: Step 0.1 — inventory local tools, then install missing ones
-  ONE AT A TIME before touching Azure:
-  ```
-  for t in brew az terraform kubectl docker gh helm k6 colima; do command -v "$t" >/dev/null && echo "✓ $t" || echo "✗ $t (missing)"; done
-  ```
+- Step 0 (local toolchain) complete — all tools present (brew, az, terraform, kubectl, docker,
+  gh, helm, k6, colima).
+- Logged into Azure already (`az account show` confirmed) — subscription
+  "Visual Studio Pro - Shane Ganesh", tenant Media24 Head Office.
+- Immediate next step: Step 1 — check/register Azure resource providers needed for this build
+  (Microsoft.ContainerService, Microsoft.ContainerRegistry, Microsoft.KeyVault,
+  Microsoft.DBforPostgreSQL, Microsoft.Storage, Microsoft.Insights).
 
 ## Repo structure
 Build it as we go, per step — do not pre-create empty scaffolding.
 
 ## Session state (handoff from chat)
-- Repo lives in OneDrive: ~/Library/CloudStorage/OneDrive-Media24HeadOffice/src/cloud-platform-lab
-- OneDrive stays as cross-machine sync; git+GitHub is the real portability layer; .gitignore keeps generated state/secrets out.
-- Done: git init (repo root correct), .gitignore created (terraform state, .env, kubeconfig, .DS_Store).
-- In progress: first commit — `git add` of .gitignore + CLAUDE.md not yet registering; verify then commit.
-- Next after commit: Step 0.1 tool inventory, then install missing tools one at a time.
+- Repo now lives at ~/practice-labs/cloud-platform-lab — moved OUT of OneDrive
+  (was ~/Library/CloudStorage/OneDrive-Media24HeadOffice/src/cloud-platform-lab).
+  Reason: OneDrive sync risked corrupting rapidly-changing files (.terraform state,
+  kubeconfig, Docker artifacts) and would have synced secrets/tfstate to corporate cloud.
+  git + GitHub (personal account) is now the sole portability/sync layer for this repo.
+- `~/practice-labs` is the new parent folder for ALL personal projects (not just this one).
+  Six other personal folders were moved there too from the OneDrive `src` folder: AWS,
+  Github - lab, Github Actions Labs, Terraform Virtual machine, cloud-native-platform,
+  infra-assessment-Azure. More may be moved in later as identified.
+- VS Code multi-root workspace created at ~/all-projects.code-workspace, listing both
+  the OneDrive `src` folder (Media24 work) and `~/practice-labs` (personal) as separate
+  roots in one window — each keeps its own independent git history.
+- Done: git init, .gitignore created, first commit made (.gitignore + CLAUDE.md).
+- Done: Step 0 tool inventory — all tools present, none needed installing except
+  helm and k6, both now installed via brew.
+- Done: confirmed Azure login via `az account show` — correct subscription active.
+- Next: Step 1 — check/register Azure resource providers, then continue roadmap from there.
+- IMPORTANT: if starting a fresh Claude Code session, launch it from
+  ~/practice-labs/cloud-platform-lab (not the old OneDrive path, which no longer exists).
