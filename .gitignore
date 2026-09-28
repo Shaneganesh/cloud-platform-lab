@@ -1,0 +1,18 @@
+# Terraform — generated state & providers (state can contain secrets)
+.terraform/
+*.tfstate
+*.tfstate.*
+.terraform.lock.hcl
+
+# Secrets & environment
+*.env
+.env
+*.pem
+*.key
+
+# Kubernetes local config
+kubeconfig
+*.kubeconfig
+
+# OS / editor noise
+.DS_Store
