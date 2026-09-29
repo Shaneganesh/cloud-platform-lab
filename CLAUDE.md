@@ -34,9 +34,9 @@ load-tested for high-concurrency bursts, fronted by observability.
 
 ## Roadmap (Azure first)
 0. Local toolchain — az, terraform, kubectl, gh, helm, k6, docker   ✅ DONE
-1. Azure auth + subscription + provider registration   ← CURRENT
+1. Azure auth + subscription + provider registration   ✅ DONE
 2. Bootstrap — resource group, Terraform remote state (storage account + container),
-   GitHub→Azure OIDC federated identity
+   GitHub→Azure OIDC federated identity   ← CURRENT
 3. GitHub repo scaffold + structure + branch protection
 4. Terraform: VNet → ACR → AKS (Free-tier control plane, small node) → outputs
 5. Containerize app (multi-stage Dockerfile) → push to ACR
@@ -58,9 +58,22 @@ load-tested for high-concurrency bursts, fronted by observability.
   gh, helm, k6, colima).
 - Logged into Azure already (`az account show` confirmed) — subscription
   "Visual Studio Pro - Shane Ganesh", tenant Media24 Head Office.
-- Immediate next step: Step 1 — check/register Azure resource providers needed for this build
-  (Microsoft.ContainerService, Microsoft.ContainerRegistry, Microsoft.KeyVault,
-  Microsoft.DBforPostgreSQL, Microsoft.Storage, Microsoft.Insights).
+- Step 1 complete — all required resource providers confirmed Registered:
+  Microsoft.ContainerService, Microsoft.ContainerRegistry, Microsoft.KeyVault,
+  Microsoft.DBforPostgreSQL, Microsoft.Storage, Microsoft.Insights.
+- Step 2 in progress:
+  - Resource group `rg-cloud-platform-lab` (southafricanorth) created via az cli,
+    then imported into Terraform state (`terraform/bootstrap/`).
+  - Terraform remote-state backend created via Terraform (local state, one-time):
+    storage account `stcloudplatformlab` (Standard_LRS, TLS1.2 min, no anonymous
+    blob access, public network access enabled for own-identity access) + blob
+    container `tfstate` (private). This bootstrap config stays on local state
+    permanently; all future Terraform configs use remote state pointed at this
+    storage account.
+  - Remaining: GitHub→Azure OIDC federated identity.
+- Working style note: Shane is learning Terraform for the first time and wants
+  to type/edit .tf files himself — Claude presents file content/diffs in chat
+  rather than writing them via tool calls.
 
 ## Repo structure
 Build it as we go, per step — do not pre-create empty scaffolding.
