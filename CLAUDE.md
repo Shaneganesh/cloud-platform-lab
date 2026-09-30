@@ -37,10 +37,8 @@ load-tested for high-concurrency bursts, fronted by observability.
 1. Azure auth + subscription + provider registration   ✅ DONE
 2. Bootstrap — resource group, Terraform remote state (storage account + container),
    GitHub→Azure OIDC federated identity   ✅ DONE
-3. GitHub repo scaffold + structure + branch protection   ← CURRENT (repo
-   created, pushed, and branch-protected already; folder structure/README
-   still outstanding)
-4. Terraform: VNet → ACR → AKS (Free-tier control plane, small node) → outputs
+3. GitHub repo scaffold + structure + branch protection   ✅ DONE
+4. Terraform: VNet → ACR → AKS (Free-tier control plane, small node) → outputs   ← CURRENT
 5. Containerize app (multi-stage Dockerfile) → push to ACR
 6. Deploy to AKS (Helm) + ingress
 7. CI/CD: GitHub Actions build→push→deploy via OIDC, environments, approval gate
@@ -96,7 +94,7 @@ load-tested for high-concurrency bursts, fronted by observability.
     clean up later.
 - Step 2 status: ✅ DONE (RG imported, tfstate backend created, OIDC federated
   identity created via managed identity).
-- Step 3 in progress:
+- Step 3: ✅ DONE.
   - Repo visibility changed private → PUBLIC. Reason: GitHub branch protection
     (both classic protection API and the newer Rulesets API) is gated behind
     GitHub Pro for private repos on personal accounts — 403 on both until the
@@ -109,8 +107,13 @@ load-tested for high-concurrency bursts, fronted by observability.
     no branch deletion, enforced for admins too (`current_user_can_bypass:
     never`). Created via `gh api --method POST .../rulesets` with a JSON
     payload (see chat history for exact JSON if recreating).
-  - Remaining: repo folder structure / README (built as-needed per step,
-    not pre-scaffolded).
+  - `README.md` added at repo root (project overview + roadmap checklist for
+    external/interview visibility). Added via a real PR (docs/add-readme →
+    main, squash-merged, branch deleted) — first exercise of the PR workflow
+    branch protection now requires for every change to `main`.
+- Next: Step 4 — Terraform VNet → ACR → AKS → outputs. This will be a new
+  Terraform config (not `terraform/bootstrap/`) using a **remote** backend
+  pointed at the `stcloudplatformlab` storage account created in Step 2.
 - Working style note: Shane is learning Terraform for the first time and wants
   to type/edit .tf files himself — Claude presents file content/diffs in chat
   rather than writing them via tool calls. Copy/pasted content has repeatedly
@@ -139,6 +142,6 @@ Build it as we go, per step — do not pre-create empty scaffolding.
 - Done: Step 0 tool inventory — all tools present, none needed installing except
   helm and k6, both now installed via brew.
 - Done: confirmed Azure login via `az account show` — correct subscription active.
-- Next: Step 1 — check/register Azure resource providers, then continue roadmap from there.
 - IMPORTANT: if starting a fresh Claude Code session, launch it from
   ~/practice-labs/cloud-platform-lab (not the old OneDrive path, which no longer exists).
+- (Steps 1–3 complete — see "Current status" above for what's next.)
