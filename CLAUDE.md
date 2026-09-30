@@ -38,7 +38,8 @@ load-tested for high-concurrency bursts, fronted by observability.
 2. Bootstrap — resource group, Terraform remote state (storage account + container),
    GitHub→Azure OIDC federated identity   ✅ DONE
 3. GitHub repo scaffold + structure + branch protection   ← CURRENT (repo
-   created + pushed already; structure/branch protection outstanding)
+   created, pushed, and branch-protected already; folder structure/README
+   still outstanding)
 4. Terraform: VNet → ACR → AKS (Free-tier control plane, small node) → outputs
 5. Containerize app (multi-stage Dockerfile) → push to ACR
 6. Deploy to AKS (Helm) + ingress
@@ -94,8 +95,22 @@ load-tested for high-concurrency bursts, fronted by observability.
     (no service principal, not referenced anywhere) — ignore or ask IT to
     clean up later.
 - Step 2 status: ✅ DONE (RG imported, tfstate backend created, OIDC federated
-  identity created via managed identity). Next: Step 3 — finish GitHub repo
-  structure + branch protection (repo itself already exists/pushed).
+  identity created via managed identity).
+- Step 3 in progress:
+  - Repo visibility changed private → PUBLIC. Reason: GitHub branch protection
+    (both classic protection API and the newer Rulesets API) is gated behind
+    GitHub Pro for private repos on personal accounts — 403 on both until the
+    repo went public. Nothing sensitive is ever committed here (secrets stay
+    out per .gitignore), and public also suits this repo's use as an interview
+    portfolio piece.
+  - Branch protection on `main` set via a Repository Ruleset (not classic
+    protection): PR required before merging (0 approvals needed, since Shane
+    is the sole contributor and can't approve his own PR), no force-push,
+    no branch deletion, enforced for admins too (`current_user_can_bypass:
+    never`). Created via `gh api --method POST .../rulesets` with a JSON
+    payload (see chat history for exact JSON if recreating).
+  - Remaining: repo folder structure / README (built as-needed per step,
+    not pre-scaffolded).
 - Working style note: Shane is learning Terraform for the first time and wants
   to type/edit .tf files himself — Claude presents file content/diffs in chat
   rather than writing them via tool calls. Copy/pasted content has repeatedly
