@@ -36,8 +36,9 @@ load-tested for high-concurrency bursts, fronted by observability.
 0. Local toolchain — az, terraform, kubectl, gh, helm, k6, docker   ✅ DONE
 1. Azure auth + subscription + provider registration   ✅ DONE
 2. Bootstrap — resource group, Terraform remote state (storage account + container),
-   GitHub→Azure OIDC federated identity   ← CURRENT
-3. GitHub repo scaffold + structure + branch protection
+   GitHub→Azure OIDC federated identity   ✅ DONE
+3. GitHub repo scaffold + structure + branch protection   ← CURRENT (repo
+   created + pushed already; structure/branch protection outstanding)
 4. Terraform: VNet → ACR → AKS (Free-tier control plane, small node) → outputs
 5. Containerize app (multi-stage Dockerfile) → push to ACR
 6. Deploy to AKS (Helm) + ingress
@@ -70,10 +71,38 @@ load-tested for high-concurrency bursts, fronted by observability.
     container `tfstate` (private). This bootstrap config stays on local state
     permanently; all future Terraform configs use remote state pointed at this
     storage account.
-  - Remaining: GitHub→Azure OIDC federated identity.
+  - GitHub repo created (private, personal account Shaneganesh) and local repo
+    pushed: https://github.com/Shaneganesh/cloud-platform-lab (remote `origin`,
+    branch `main` tracking). This was pulled forward from Step 3 (just
+    create+push) since OIDC federated credentials need the repo to exist first.
+    Full Step 3 (repo structure, branch protection) still outstanding.
+  - GitHub→Azure OIDC federated identity: DONE, via `terraform/bootstrap/oidc.tf`.
+    IMPORTANT — the Media24 Azure AD tenant blocks self-service Azure AD app
+    registration/service principal/federated-credential creation (403
+    Authorization_RequestDenied; can't even delete an app you just registered —
+    looks like an auto-applied Restricted Management Administrative Unit policy).
+    Regular Azure RBAC roles (Contributor/Owner) do NOT grant Entra ID app-admin
+    rights — separate permission systems. Worked around by using a **User-Assigned
+    Managed Identity** (`azurerm_user_assigned_identity` +
+    `azurerm_federated_identity_credential`, both pure Azure RBAC resources)
+    instead of an Azure AD App Registration + Service Principal. Apply this same
+    pattern for any future Azure AD identity needs in this tenant.
+    Known leftover: one orphaned, unusable Azure AD app registration
+    (display name `github-actions-cloud-platform-lab`, id
+    `5d043a55-35df-4dd9-b0ac-7486da5cd348`) exists in the tenant, not tracked in
+    Terraform state, cannot be deleted without tenant admin help. Harmless
+    (no service principal, not referenced anywhere) — ignore or ask IT to
+    clean up later.
+- Step 2 status: ✅ DONE (RG imported, tfstate backend created, OIDC federated
+  identity created via managed identity). Next: Step 3 — finish GitHub repo
+  structure + branch protection (repo itself already exists/pushed).
 - Working style note: Shane is learning Terraform for the first time and wants
   to type/edit .tf files himself — Claude presents file content/diffs in chat
-  rather than writing them via tool calls.
+  rather than writing them via tool calls. Copy/pasted content has repeatedly
+  landed wrong (wrong directory, trailing dot in filename, whole chat messages
+  pasted into files) — prefer giving a `cat > file << 'EOF' ... EOF` heredoc
+  command over "paste this into your editor" instructions, since Shane runs it
+  in the terminal himself and it can't go to the wrong file/location.
 
 ## Repo structure
 Build it as we go, per step — do not pre-create empty scaffolding.
